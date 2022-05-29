@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ru">
+    <head>
+        <meta charset="UTF-8">
+        <title>Добро пожаловать в GluFalcon</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    </head>
+    <body>
+        <header class="header">
+            <a href="{{ url_for('index') }}">
+                <h1>DiaFalcon</h1>
+            </a>
+            <ul id="header__menu">
+                <a href="{{url_for('login')}}">
+                    <li>
+                        Войти
+                    </li>
+                </a>
+                <a href="{{ url_for('registration') }}">
+                    <li>
+                        Зарегистрироваться
+                    </li>
+                </a>
+            </ul>
+        </header>
+        <main class="main">
+            <section class="main__section">
+                <h2>Добро пожаловать в систему информационной поддержки GluFalcon</h2>
+            </section>
+            <section class="main__section">
+
+            </section>
+            <section class="main__section">
+
+            </section>
+
+        </main>
+    </body>
+</html>

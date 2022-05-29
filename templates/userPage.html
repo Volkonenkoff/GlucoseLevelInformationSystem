@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ru">
+    <head>
+        <meta charset="UTF-8">
+        <title>Личный кабинет</title>
+        <link rel="stylesheet" href="{{url_for('static', filename='style.css')}}">
+    </head>
+    <body>
+        <header class="header">
+            <a href="{{ url_for('index') }}">
+                <h1>DiaFalcon</h1>
+            </a>
+            <ul id="header__menu">
+                <li>
+                    <a href="{{ url_for('logout') }}">
+                        Выйти из системы
+                    </a>
+                </li>
+            </ul>
+        </header>
+        <main>
+            <section class="main__section">
+                <h2>{{ user_data.lastname }} {{ user_data.firstname }}</h2>
+            </section>
+
+            <section id="mode" class="main__section">
+                <ul id="mode__menu">
+                    <li>
+                        <a href="{{ url_for('user_device_connected',
+                                    user_id=current_user.get_id(),
+                                    device="device")
+                                }}">
+                            Подключить сенсор
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('user_manual_work', user_id=current_user.get_id()) }}">
+                            Ручной режим работы
+                        </a>
+                    </li>
+                </ul>
+            </section>
+        </main>
+    </body>
+</html>

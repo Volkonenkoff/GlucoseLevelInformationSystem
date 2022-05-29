@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="ru">
+    <head>
+        <meta charset="UTF-8">
+        <title>Автоматический режим работы</title>
+        <link rel="stylesheet" href="{{url_for('static', filename='style.css')}}">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    </head>
+    <body>
+        <section class="main__section">
+            <h2>F</h2>
+        </section>
+        <main id="auto">
+            <section id="data" class="main__section">
+                <h2>График изменения уровня глюкозы</h2>
+                <div class="wrapper">
+                     <div class="wrapper__subblock">
+                        <section class="data__infoblock main__section">
+                            <h2>Состояние</h2>
+                            <p>Последнее измерение было в: </p>
+                            <p id="current-time">{{ current_time }}</p>
+                            <p>Уровень глюкозы на момент измерения: </p>
+                            <p id="current-glucose-value">{{  }}</p>
+                            <p>Предположительный уровень глюкозы через час: </p>
+                            <p id="predicted-glucose-value">{{  }}</p>
+                        </section>
+                    </div>
+                </div>
+            </section>
+            <section id="plot" class="main__section">
+            </section>
+        </main>
+    </body>
+</html>

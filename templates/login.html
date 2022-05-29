@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ru">
+    <head>
+        <meta charset="UTF-8">
+        <title>Авторизация в системе</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    </head>
+    <body>
+        <header class="header">
+            <a href="{{ url_for('index') }}">
+                <h1>DiaFalcon</h1>
+            </a>
+            <ul id="header__menu">
+                <li>
+                    <a href="{{ url_for('login') }}">
+                        Войти
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url_for('registration') }}">
+                        Зарегистрироваться
+                    </a>
+                </li>
+            </ul>
+        </header>
+        <main class="main">
+            <section class="main__section">
+                <h2>Вход в систему информационной поддержки DiaFalcon</h2>
+            </section>
+            <section class="error-section main__section">
+                {% for field, errors in form.errors.items() %}
+                    <p class="error-section__message">
+                        {{ ', '.join(errors) }}
+                    </p>
+                {% endfor %}
+            </section>
+            <section id="login-section" class="main__section">
+                <form action="" method="post">
+                    {{ form.csrf_token }}
+                    <p>
+                        {{ form.email.label() }}
+                        {{ form.email(class="form__field") }}
+                    </p>
+                    <p>
+                        {{ form.password.label() }}
+                        {{ form.password(class="form__field") }}
+                    </p>
+                    <p>
+                        {{ form.remember_me.label() }}
+                        {{ form.remember_me(class="form__boolean") }}
+                    </p>
+                    <p>
+                        {{ form.submit_button(class="btn") }}
+                    </p>
+                </form>
+            </section>
+        </main>
+    </body>
+</html>

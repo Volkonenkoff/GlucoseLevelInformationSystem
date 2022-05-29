@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ru">
+    <head>
+        <meta charset="UTF-8">
+        <title>Ручной режим работы</title>
+        <link rel="stylesheet" href="{{url_for('static', filename='style.css')}}">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    </head>
+    <body>
+        <header class="header">
+            <a href="{{ url_for('index') }}">
+                <h1>DiaFalcon</h1>
+            </a>
+            <ul id="header__menu">
+                <li>
+                    <a href="{{ url_for('logout') }}">
+                        Выйти из системы
+                    </a>
+                </li>
+            </ul>
+        </header>
+        <main id="manual">
+            <section id="data" class="main__section">
+                <h2>Рабочая панель</h2>
+                <div class="wrapper">
+                     <div class="wrapper__subblock">
+                        <section class="data__infoblock main__section">
+                            <h3>Состояние</h3>
+                            <p>Последнее измерение было в: </p>
+                            <p id="current-time">{{ current_time }}</p>
+                            <p>Уровень глюкозы на момент измерения: </p>
+                            <p id="current-glucose-value">{{ current_glucose_value }}</p>
+                            <p>Предположительный уровень глюкозы через час: </p>
+                            <p id="predicted-glucose-value">{{ predicted_glucose_value }}</p>
+                            <p>Рекомендация: </p>
+                            <p id="recommendation"><b>{{ recommendation }}</b></p>
+                        </section>
+                    </div>
+                    <div class="wrapper__subblock">
+                        <section class="error-section main__section">
+                            {% if errors!="" %}
+                                <p class="error-section__message">
+                                     {{ errors }}
+                                </p>
+                            {% endif %}
+                        </section>
+                        <section id="control" class="main__section">
+                            <h3>Ввод данных</h3>
+                            <form id="measurement-add" action="" method="post">
+                                {{ form.csrf_token }}
+                                <p>
+                                    {{ form.glucose_value.label() }}
+                                    {{ form.glucose_value(class="form__field", id="glucose-value") }}
+                                </p>
+                                <p>
+                                    {{ form.submit_button(class="btn") }}
+                                </p>
+                            </form>
+                        </section>
+                    </div>
+                </div>
+            </section>
+            <section id="plot" class="main__section">
+            </section>
+        </main>
+        <script>
+            var repeatable_checking = function(){$.ajax({
+                url: '/update_data/{{ current_user.get_id() }}',
+                type: 'GET',
+                success: function(response) {
+                    console.log(response);
+                    $("#current-glucose-value").html(response["current_glucose_value"]);
+                    $("#current-time").html(response["current_time"]);
+                    $("#predicted-glucose-value").html(response["predicted_glucose_value"]);
+                    $("#recommendation").html(response["recommendation"]);
+                    $("#plot").html(response["plot"]);
+                },
+                error: function(error) {
+                    console.log(error);
+                }
+            })}
+            repeatable_checking();
+            setInterval(repeatable_checking, 1000*60*5);
+        </script>
+        <script>
+            $("btn").click(function(e) {
+                e.preventDefault();
+                var send_data = $("#glucose-value").val();
+                $('form[name=measurement_add]').trigger('reset');
+                $.ajax({
+                    type:'POST',
+                    url:'/user/id{{ current_user.get_id() }}/manual',
+                    data: {
+                        glucose_value: send_data
+                    },
+                    success:function(response) {
+                        console.log(response);
+                    },
+                    error: function(error) {
+                        console.log(error);
+                    }
+                })
+            });
+        </script>
+    </body>
+</html>
