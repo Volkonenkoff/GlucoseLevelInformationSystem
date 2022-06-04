@@ -18,6 +18,7 @@
                     </a>
                 </li>
             </ul>
+
         </header>
         <main id="manual">
             <section id="data" class="main__section">
@@ -64,42 +65,82 @@
             </section>
         </main>
         <script>
-            var repeatable_checking = function(){$.ajax({
-                url: '/update_data/{{ current_user.get_id() }}',
-                type: 'GET',
-                success: function(response) {
-                    console.log(response);
-                    $("#current-glucose-value").html(response["current_glucose_value"]);
-                    $("#current-time").html(response["current_time"]);
-                    $("#predicted-glucose-value").html(response["predicted_glucose_value"]);
-                    $("#recommendation").html(response["recommendation"]);
-                    $("#plot").html(response["plot"]);
-                },
-                error: function(error) {
-                    console.log(error);
+            $(document).ready(function(){
+                // Создается элемент аудио для оповещения
+                var audio = document.createElement("audio")
+                // Элемент добавляется в документ
+                document.body.appendChild(audio);
+                //Указывается путь до аудиофайла
+                audio.src = "{{url_for('static', filename='notification.mp3')}}"
+                // Функция для обновления данных на странице
+                // В конце выполнения проигрывается оповещение
+                // Функция реализует асинхронный запрос
+                var repeatable_checking = function(){
+                    $.ajax({
+                        // Адрес запроса.
+                        url: '/update_data/{{ current_user.get_id() }}',
+                        // Тип запроса.
+                        type: 'GET',
+                        // Что делать, в случае успешного запроса.
+                        success: function(response) {
+                            console.log(response);
+                            // Получение данных из ответа на запрос.
+                            // После получения значения полей ответа присваиваются значениям полей страницы
+                            $("#current-glucose-value").html(response["current_glucose_value"]);
+                            $("#current-time").html(response["current_time"]);
+                            $("#predicted-glucose-value").html(response["predicted_glucose_value"]);
+                            $("#recommendation").html(response["recommendation"]);
+                            $("#plot").html(response["plot"]);
+                            // Проигрыш звукового оповещения
+                            audio.play()
+                        },
+                        // Что делать, в случае неудачного запроса.
+                        error: function(error) {
+                            console.log(error);
+                        }
+                    })
+
                 }
-            })}
-            repeatable_checking();
-            setInterval(repeatable_checking, 1000*60*5);
+                // Первый вызов для получения данных
+                repeatable_checking();
+                // Установка интервального вызова по таймеру
+                // Функция вызывается каждые 5 минут
+                setInterval(repeatable_checking, 1000*60*5);
+            });
         </script>
         <script>
-            $("btn").click(function(e) {
-                e.preventDefault();
-                var send_data = $("#glucose-value").val();
-                $('form[name=measurement_add]').trigger('reset');
-                $.ajax({
-                    type:'POST',
-                    url:'/user/id{{ current_user.get_id() }}/manual',
-                    data: {
-                        glucose_value: send_data
-                    },
-                    success:function(response) {
-                        console.log(response);
-                    },
-                    error: function(error) {
-                        console.log(error);
-                    }
-                })
+            // Добавляется обработчик события нажатия на кнопку.
+            // По данному нажатию реализуется асинхронный запрос.
+            // При успехе в БД добавляется запись о измерении.
+            // При ошибке выводится сообщение об ошибке.
+            $(document).ready(function() {
+                // Обработка события.
+                $("btn").click(function (e) {
+                    // Остановка перезагрузки страницы.
+                    e.preventDefault();
+                    // Получение данных из формы.
+                    var send_data = $("#glucose-value").val();
+                    // Тело запроса.
+                    $.ajax({
+                        // Тип запроса.
+                        type: 'POST',
+                        // Адрес запроса.
+                        url: '/user/id{{ current_user.get_id() }}/manual',
+                        // Структура данных для отправки
+                        data: {
+                            // Полю glucose_value структуры data присвоить send_data
+                            glucose_value: send_data
+                        },
+                        // Что делать, в случае успешного запроса.
+                        success: function (response) {
+                            console.log(response);
+                        },
+                        // Что делать, в случае неудачного запроса.
+                        error: function (error) {
+                            console.log(error);
+                        }
+                    })
+                });
             });
         </script>
     </body>

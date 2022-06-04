@@ -7,28 +7,177 @@
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     </head>
     <body>
-        <section class="main__section">
-            <h2>F</h2>
-        </section>
+        <header class="header">
+            <a href="{{ url_for('index') }}">
+                <h1>DiaFalcon</h1>
+            </a>
+            <ul id="header__menu">
+                <li>
+                    <a href="{{ url_for('logout') }}">
+                        Выйти из системы
+                    </a>
+                </li>
+            </ul>
+        </header>
         <main id="auto">
-            <section id="data" class="main__section">
-                <h2>График изменения уровня глюкозы</h2>
-                <div class="wrapper">
-                     <div class="wrapper__subblock">
-                        <section class="data__infoblock main__section">
-                            <h2>Состояние</h2>
-                            <p>Последнее измерение было в: </p>
-                            <p id="current-time">{{ current_time }}</p>
-                            <p>Уровень глюкозы на момент измерения: </p>
-                            <p id="current-glucose-value">{{  }}</p>
-                            <p>Предположительный уровень глюкозы через час: </p>
-                            <p id="predicted-glucose-value">{{  }}</p>
-                        </section>
+                <section id="data" class="main__section">
+                    <h2>Рабочая панель</h2>
+                    <div class="wrapper">
+                         <div class="wrapper__subblock">
+                            <section class="data__infoblock main__section">
+                                <h3>Состояние</h3>
+                                <p>Последнее измерение было в: </p>
+                                <p id="current-time">{{ current_time }}</p>
+                                <p>Уровень глюкозы на момент измерения: </p>
+                                <p id="current-glucose-value">{{ current_glucose_value }}</p>
+                                <p>Предположительный уровень глюкозы через час: </p>
+                                <p id="predicted-glucose-value">{{ predicted_glucose_value }}</p>
+                                <p>Рекомендация: </p>
+                                <p id="recommendation"><b>{{ recommendation }}</b></p>
+                            </section>
+                        </div>
+                        <div class="wrapper__subblock">
+                            <section id="devices__section" class="main__section">
+                                <h3>Выбор устройства</h3>
+                                <div id="devices__subblock" class="wrapper">
+                                    <button class="btn" id="connect">
+                                        Найти и подключить устройство
+                                    </button>
+                                    <button class="btn" id="disconnect" hidden>
+                                        Отключить устройство
+                                    </button>
+                                </div>
+                            </section>
+                        </div>
                     </div>
-                </div>
-            </section>
-            <section id="plot" class="main__section">
-            </section>
+                </section>
+                <section id="plot" class="main__section">
+                </section>
         </main>
+        <script>
+            // Ожидание, пока документ загрузится полностью.
+            $(document).ready(function() {
+                var find_devices = function() {
+                    // Взаимодействие с бразуером через navigator, запрос на подключение.
+                    navigator.bluetooth.requestDevice({
+                        // Фильтр: наличие сервиса Glucose.
+                        // Фильтр указывается в соответствии со спецификацией:
+                        // URL: https://www.bluetooth.com/specifications/specs/
+                        filters: [{ services: ['glucose'] }] })
+                        // Попытка соединения с удаленным сервером GATT.
+                    .then(device =>
+                    {
+                        //Добавление обработчика событий на отключение.
+                        device.addEventListener('gattserverdisconnected', on_disconnect);
+                        document.getElementById("disconnect").onclick = device.gatt.disconnect
+                        device.gatt.connect();
+                    })
+                        // Получение доступа к сервису.
+                    .then(server => server.getPrimaryService('glucose'))
+                        // Получение доступа к характеристике сервиса.
+                    .then(service => service.getCharacteristic('glucose_measurement'))
+                        // Включение уведомлений об изменении уровня глюкозы.
+                    .then(characteristic => characteristic.startNotifications())
+                        // Добавление обработчика событий.
+                        // На изменение уровня глюкозы вызывается функция.
+                    .then(characteristic => {
+                      characteristic.addEventListener('characteristicvaluechanged',
+                                                      value_changed)
+                        // Асихнронный запрос для изменения переменной сессии.
+                        $.ajax({
+                            url: '/bluconnect/{{ current_user.get_id() }}',
+                            type: 'GET',
+                            success: function(response) {
+                                console.log(response);
+                                //Скрывает элемент.
+                                $("#connect").hide();
+                                //Показывает элемент.
+                                $("#disconnect").show();
+                            },
+                            error: function(error) {
+                                console.log(error);
+                            }
+                        })
+                    })
+                    .catch(error => { console.error(error); });
+                }
+
+                //Функция обработчик для получения данных с устройства
+                function value_changed(event) {
+                  const value = event.target.value;
+                  send_data = value;
+                  $.ajax({
+                        // Тип запроса.
+                        type: 'POST',
+                        // Адрес запроса.
+                        url: 'bluvalue/{{ current_user.get_id() }}',
+                        dataType: 'application/json',
+                        // Структура данных для отправки
+                        data: {
+                            // Полю glucose_value структуры data присвоить send_data
+                            'glucose_value': send_data
+                        },
+                        // Что делать, в случае успешного запроса.
+                        success: function (response) {
+                            console.log(response);
+                        },
+                        // Что делать, в случае неудачного запроса.
+                        error: function (error) {
+                            console.log(error);
+                        }
+                    })
+                }
+
+                //Функция обработчик для отключения устройства
+                function on_disconnect(event) {
+                    const device = event.target;
+                    // Асихнронный запрос для изменения переменной сессии
+                        $.ajax({
+                            url: '/bludisconnect/{{ current_user.get_id() }}',
+                            type: 'GET',
+                            success: function(response) {
+                                console.log(response);
+                                // Показывает элемент.
+                                $("#connect").show();
+                                // Скрывает элемент.
+                                $("#disconnect").hide();
+                            },
+                            error: function(error) {
+                                console.log(error);
+                            }
+                        })
+                    console.log(`Устройство ${device.name} отключено.`);
+                }
+                document.getElementById("connect").onclick = find_devices
+            });
+        </script>
+        <script>
+            $(document).ready(function(){
+                var audio = document.createElement("audio")
+                document.body.appendChild(audio);
+                audio.src = "{{url_for('static', filename='notification.mp3')}}"
+                var repeatable_checking = function(){
+                    {% if session['connected'] %}
+                        $.ajax({
+                            url: '/update_data/{{ current_user.get_id() }}',
+                            type: 'GET',
+                            success: function(response) {
+                                console.log(response);
+                                $("#current-glucose-value").html(response["current_glucose_value"]);
+                                $("#current-time").html(response["current_time"]);
+                                $("#predicted-glucose-value").html(response["predicted_glucose_value"]);
+                                $("#recommendation").html(response["recommendation"]);
+                                $("#plot").html(response["plot"]);
+                                audio.play()
+                            },
+                            error: function(error) {
+                                console.log(error);
+                            }
+                        })
+                    {% endif %}
+                }
+                setInterval(repeatable_checking, 1000*60*5);
+                });
+            </script>
     </body>
 </html>

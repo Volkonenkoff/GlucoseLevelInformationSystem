@@ -30,12 +30,19 @@
                                     user_id=current_user.get_id(),
                                     device="device")
                                 }}">
-                            Подключить сенсор
+                            Подключить устройство
                         </a>
                     </li>
                     <li>
-                        <a href="{{ url_for('user_manual_work', user_id=current_user.get_id()) }}">
+                        <a href="{{ url_for('user_manual_work',
+                                    user_id=current_user.get_id()) }}">
                             Ручной режим работы
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('download_history',
+                                    user_id=current_user.get_id()) }}">
+                            Скачать историю по уровню глюкозы
                         </a>
                     </li>
                 </ul>

@@ -7,6 +7,9 @@
     --main-backcolor: #f8f8f8;
     --main-darkercolor: #c4c4c4;
     --main-textcolor: #000000;
+    --dvc--backcolor: #cefdff;
+    --dvc--darkercolor: #aedbdc;
+    --dvc--selectedcolor: #fc7923;
     --btn-backcolor: #0d7ae7;
     --btn-hovered-backcolor: #082644;
     --btn-textcolor: #ffffff;
@@ -48,6 +51,9 @@ html, body {
 
 
 .main {
+    display: flex;
+    justify-content: center;
+    align-items: center;
     height: 100%;
     background-color: var(--main-backcolor);
     color: var(--main-textcolor);
@@ -64,6 +70,7 @@ html, body {
 
 h2, h3 {
     margin: 0;
+    padding-bottom: 7px;
 }
 
 .main__section {
@@ -91,7 +98,6 @@ h2, h3 {
     display: flex;
     flex-direction: column;
 }
-
 
 #control p{
     padding-bottom: 5px;
@@ -121,7 +127,7 @@ h2, h3 {
     background-color: var(--btn-hovered-backcolor);
 }
 
-#manual {
+#manual, #auto {
     margin: 0 auto;
     width: 85%;
     display: flex;
@@ -146,6 +152,7 @@ h2, h3 {
 .data__infoblock {;
     display: flex;
     flex-direction: column;
+
 }
 
 .data__infoblock p:nth-child(odd){;
@@ -174,6 +181,8 @@ h2, h3 {
     border-radius: 14px 14px 14px 14px;
 }
 
+
+
 .error-section {
     width: 50%;
     margin: 0 auto;
@@ -199,4 +208,25 @@ h2, h3 {
 
 #plot {
     max-width: 720px;
+}
+
+#mode__menu {
+    padding: 7px;
+    display: flex;
+    flex-flow: column;
+    row-gap: 15px;
+    list-style-type: none;
+}
+
+#mode__menu * {
+    padding: 7px;
+    text-decoration: none;
+    background-color: var(--btn-backcolor);
+    color: var(--btn-textcolor);
+    border-radius: 14px 14px 14px 14px;
+    text-align: center;
+}
+
+#mode__menu *:hover {
+    background-color: var(--btn-hovered-backcolor);
 }
